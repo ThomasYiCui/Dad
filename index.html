@@ -4,20 +4,18 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <title>replit</title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
+    <title>To Dad and Ela</title>
 </head>
 
 <body>
     <canvas id="canvi"></canvas>
-    <script src="setup.js"></script>
 <script>
-let canvas = document.getElementById("canvi");
-let ctx = canvas.getContext("2d");
+var canvas = document.getElementById("canvi");
+var ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-let balls = [];
-let frames = 0;
+var balls = [];
+var frame = 0;
 
 function ball(color) {
   this.x = 100;
@@ -27,8 +25,25 @@ function ball(color) {
   this.color = color;
 }
 ball.prototype.update = function() {
-  this.x+=this.aX;
-  this.y+=this.aY;
+    this.x+=this.aX;
+    this.y+=this.aY;
+    this.aY+=0.1;
+    if(this.x < 0) {
+        this.x = 0;
+        this.aX*=-1;
+    }
+    if(this.y < 0) {
+        this.y = 0;
+        this.aY*=-1;
+    }
+    if(this.x > canvas.width) {
+        this.x = canvas.width;
+        this.aX*=-1;
+    }
+    if(this.y > canvas.height) {
+        this.y = canvas.height;
+        this.aY*=-1;
+    }
 }
 ball.prototype.display = function() {
   ctx.fillStyle = this.color;
@@ -38,16 +53,18 @@ ball.prototype.display = function() {
 }
 
 setInterval(function() {
-  ctx.fillStyle = "rgb(200, 200, 200)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  for(let i = 0; i < balls.length; i++) {
-    balls[i].update();
-    balls[i].display();
-  }
-  if(frames <= 100) {
-    balls.push(new ball("rgb(255, 255, 255)"));
-  }
-  frames+=1;
+    ctx.fillStyle = "rgb(200, 200, 200)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    for(var i = 0; i < balls.length; i++) {
+        ctx.fillStyle = "rgb(0, 0, 0)"
+        ctx.fillRect(Math.random() * 100, Math.random() * 100, 10, 10)
+        balls[i].update();
+        balls[i].display();
+    }
+    if(frame <= 100) {
+        balls.push(new ball("rgb(255, 255, 255)"));
+    }
+    frame+=1;
 }, 15)
 
 // THE TABLE
