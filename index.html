@@ -10,61 +10,193 @@
 <body>
     <canvas id="canvi"></canvas>
 <script>
+var colorArray = [
+0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+];
+var dropDelay = 20;
 var canvas = document.getElementById("canvi");
 var ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+var radius = 15;
+canvas.width = radius * 20;
+canvas.height = radius * 20;
+var graphs = [];
+for(let i = 0; i < canvas.height/radius; i++) {
+    let row = [];
+    for(let j = 0; j < canvas.width/radius; j++) {
+        row.push([]);
+    }
+    graphs.push(row);
+}
+var gly = graphs.length;
+var glx = graphs[0].length;
+console.log(graphs.length)
 var balls = [];
 var frame = 0;
+function dist(x1, y1, x2, y2) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
 
-function ball(color) {
-  this.x = 100;
-  this.y = 100;
-  this.aX = 3;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function ball(color, i) {
+  this.x = 20 + frame % 290;
+  this.i = i;
+  this.chunkX = 0;
+  this.chunkY = 0;
+  this.y = canvas.height - 50;
+  this.aX = 0;
   this.aY = 0;
   this.color = color;
 }
 ball.prototype.update = function() {
     this.x+=this.aX;
     this.y+=this.aY;
-    this.aY+=0.1;
-    if(this.x < 0) {
-        this.x = 0;
+    this.aX*=0.995;
+    this.aY*=0.995;
+    this.aY-=0.01;
+    if(this.x < radius) {
+        this.x = radius;
         this.aX*=-1;
     }
-    if(this.y < 0) {
-        this.y = 0;
-        this.aY*=-1;
+    if(this.y < radius) {
+        this.y = radius;
+        this.aY = Math.abs(this.aY * -0.5);
+        this.aX*=0.8
     }
-    if(this.x > canvas.width) {
-        this.x = canvas.width;
+    if(this.x > canvas.width - radius) {
+        this.x = canvas.width - radius;
         this.aX*=-1;
     }
-    if(this.y > canvas.height) {
-        this.y = canvas.height;
+    if(this.y > canvas.height - radius) {
+        this.y = canvas.height - radius - 1;
         this.aY*=-1;
     }
+    this.chunkX = Math.floor(this.x/radius);
+    this.chunkY = Math.floor(this.y/radius);
+    graphs[this.chunkY][this.chunkX].push(this);
 }
 ball.prototype.display = function() {
   ctx.fillStyle = this.color;
   ctx.beginPath();
-  ctx.arc(this.x, this.y, 10, 10, 0, 4 * Math.PI);
+  ctx.arc(this.x, this.y, radius, radius, 0, 4 * Math.PI);
   ctx.fill();
+  ctx.fillStyle = "rgb(0, 0, 0)";
+  ctx.font = "25px Arial";
+  ctx.fillText(this.i, this.x - radius/2, this.y + radius/2);
+}
+ball.prototype.collide = function() {
+	let balls = [];
+    balls.push(graphs[this.chunkY][this.chunkX]);
+    if(this.chunkX > 0 && this.chunkY > 0) {
+    	balls.push(graphs[this.chunkY - 1][this.chunkX - 1]);
+    }
+    if(this.chunkX > 0 && this.chunkY < gly) {
+    	balls.push(graphs[this.chunkY + 1][this.chunkX - 1]);
+    }
+    if(this.chunkX < glx && this.chunkY > 0) {
+    	balls.push(graphs[this.chunkY - 1][this.chunkX + 1]);
+    }
+    if(this.chunkX < glx && this.chunkY < gly) {
+    	balls.push(graphs[this.chunkY + 1][this.chunkX + 1]);
+    }
+    if(this.chunkX > 0) {
+    	balls.push(graphs[this.chunkY][this.chunkX - 1]);
+    }
+    if(this.chunkY > 0) {
+    	balls.push(graphs[this.chunkY - 1][this.chunkX]);
+    }
+    if(this.chunkX < glx) {
+    	balls.push(graphs[this.chunkY][this.chunkX + 1]);
+    }
+    if(this.chunkY < gly) {
+    	balls.push(graphs[this.chunkY + 1][this.chunkX]);
+    }
+    balls = balls.flat();
+    for(let i = 0; i < balls.length; i++){ 
+    	let ball2 = balls[i];
+        //console.log(ball2);
+        if(ball2 === this || !ball2) {
+        	continue;
+        }
+        const dx = this.x - ball2.x;
+        const dy = this.y - ball2.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const maxDistance = radius * 2 + 1;
+
+        if(distance < maxDistance) {
+            // Collision detected, calculate new velocities
+            const angle = Math.atan2(dy, dx);
+            const sin = Math.sin(angle);
+            const cos = Math.cos(angle);
+            this.x+=cos * (maxDistance - distance)/2;
+            this.y+=sin * (maxDistance - distance)/2;
+            ball2.x-=cos * (maxDistance - distance)/2;
+            ball2.y-=sin * (maxDistance - distance)/2;
+            
+            
+            this.aX+=cos * (maxDistance - distance)/10;
+            this.aY+=sin * (maxDistance - distance)/10 ;
+            ball2.aX-=cos * (maxDistance - distance)/10;
+            ball2.aY-=sin * (maxDistance - distance)/10;
+            
+            
+            if(this.x < radius) {
+                this.x = radius;
+            }
+            if(this.y < radius) {
+                this.y = radius;
+            }
+            if(this.x > canvas.width - radius) {
+                this.x = canvas.width - radius;
+            }
+            if(this.y > canvas.height - radius) {
+                this.y = canvas.height - radius - 1;
+            }
+            this.aX*=0.9;
+            this.aY*=0.9;
+            ball2.aX*=0.9;
+            ball2.aY*=0.9;
+        }
+    }
 }
 
 setInterval(function() {
-    ctx.fillStyle = "rgb(200, 200, 200)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+	ctx.fillStyle = "rgb(200, 200, 200)";
+     ctx.fillRect(0, 0, canvas.width, canvas.height);
+	for(var i = 0; i < balls.length; i++) {
+      balls[i].display();
+    }
+  for(var z = 0; z < 10; z++) {
+  for(var i = 0; i < balls.length; i++) {
+    balls[i].update();
+  }
     for(var i = 0; i < balls.length; i++) {
-        ctx.fillStyle = "rgb(0, 0, 0)"
-        ctx.fillRect(Math.random() * 100, Math.random() * 100, 10, 10)
-        balls[i].update();
-        balls[i].display();
+      balls[i].collide()
     }
-    if(frame <= 100) {
-        balls.push(new ball("rgb(255, 255, 255)"));
+  if(frame % dropDelay === 0 && frame <= 101 * dropDelay) {
+    if(colorArray[frame/dropDelay] === 0) {
+      balls.push(new ball("rgb(255, 255, 255)", frame/dropDelay));
+    } else if(colorArray[frame/dropDelay] === 1) {
+      balls.push(new ball("rgb(0, 0, 0)", frame/dropDelay));
+    } else if(colorArray[frame/dropDelay] === 2) {
+      balls.push(new ball("rgb(255, 0, 0)", frame/dropDelay));
+    } else if(colorArray[frame/dropDelay] === 3) {
+      balls.push(new ball("rgb(0, 0, 255)", frame/dropDelay));
     }
-    frame+=1;
+  }
+  frame+=1;
+  for(let i = 0; i < canvas.height/20; i++) {
+    for(let j = 0; j < canvas.width/20; j++) {
+      graphs[i][j] = [];
+    }
+  }
+  }
+ 
 }, 15)
 
 // THE TABLE
