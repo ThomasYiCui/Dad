@@ -82,9 +82,11 @@
             ctx.beginPath();
             ctx.arc(this.x, this.y, radius, radius, 0, 4 * Math.PI);
             ctx.fill();
+		/*
             ctx.fillStyle = "rgb(0, 0, 0)";
             ctx.font = "25px Arial";
             ctx.fillText(this.i, this.x - radius / 2, this.y + radius / 2);
+	    */
         }
         ball.prototype.collide = function() {
             let balls = [];
