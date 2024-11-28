@@ -11,11 +11,7 @@
     <canvas id="canvi"></canvas>
 <script>
 var colorArray = [
-0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 1, 0, 2, 0, 0, 0, 0, 0, 0, 2, 2, 1, 2, 2, 2, 1, 2, 2, 0, 0, 0, 0, 0, 2, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 1, 2, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1, 0, 0, 0, 0
 ];
 var dropDelay = 20;
 var canvas = document.getElementById("canvi");
@@ -181,12 +177,10 @@ setInterval(function() {
   if(frame % dropDelay === 0 && frame <= 101 * dropDelay) {
     if(colorArray[frame/dropDelay] === 0) {
       balls.push(new ball("rgb(255, 255, 255)", frame/dropDelay));
-    } else if(colorArray[frame/dropDelay] === 1) {
-      balls.push(new ball("rgb(0, 0, 0)", frame/dropDelay));
     } else if(colorArray[frame/dropDelay] === 2) {
+      balls.push(new ball("rgb(0, 0, 0)", frame/dropDelay));
+    } else if(colorArray[frame/dropDelay] === 1) {
       balls.push(new ball("rgb(255, 0, 0)", frame/dropDelay));
-    } else if(colorArray[frame/dropDelay] === 3) {
-      balls.push(new ball("rgb(0, 0, 255)", frame/dropDelay));
     }
   }
   frame+=1;
